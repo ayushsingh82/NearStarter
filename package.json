@@ -15,6 +15,7 @@
     "@near-wallet-selector/modal-ui": "^9.0.2",
     "@near-wallet-selector/near-wallet": "^8.9.3",
     "@near-wallet-selector/nightly": "^9.0.2",
+    "@near-wallet-selector/hot-wallet": "^9.4.0",
     "@rainbow-me/rainbowkit": "^2.2.8",
     "@tanstack/react-query": "^5.81.5",
     "react": "^19.1.0",

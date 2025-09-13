@@ -15,6 +15,7 @@ import { setupMyNearWallet } from "@near-wallet-selector/my-near-wallet";
 import { VertoContract, NetworkId } from "../lib/config/near";
 import { providers } from "near-api-js";
 import { setupMeteorWallet } from "@near-wallet-selector/meteor-wallet";
+import { setupHotWallet } from "@near-wallet-selector/hot-wallet";
 import { setupBitteWallet } from "@near-wallet-selector/bitte-wallet";
 
 const THIRTY_TGAS = "30000000000000";
@@ -47,9 +48,11 @@ const NearWalletProvider = ({ children }) => {
     const meteorWallet = setupMeteorWallet({});
     const bitteWallet = setupBitteWallet({});
 
+    const hotWallet = setupHotWallet({});
+
     const selector = setupWalletSelector({
       network: NetworkId,
-      modules: [meteorWallet , bitteWallet],
+      modules: [meteorWallet , bitteWallet , hotWallet],
     }).then((selector) => {
       setWalletSelector(selector);
       setStatus(selector.isSignedIn() ? "authenticated" : "unauthenticated");
