@@ -23,7 +23,7 @@ export function SolanaView({ props: { setStatus }, signer }) {
   const [currentStep, setCurrentStep] = useState("request");
   const [signedTransaction, setSignedTransaction] = useState(null);
   const [senderAddress, setSenderAddress] = useState("");
-  const [solanaBalance, setSolanaBalance] = useState("0");
+  const [solanaBalance, setSolanaBalance] = useState("0.000000");
 
   const [derivationPath, setDerivationPath] = useState("solana-1");
   const debouncedDerivationPath = useDebounce(derivationPath, 500);
@@ -71,29 +71,30 @@ export function SolanaView({ props: { setStatus }, signer }) {
           return a & a;
         }, 0);
         
-        // Generate a mock Solana address
-        const mockAddress = `Sol${Math.abs(pathHash).toString(36)}${accountPrefix.slice(-4)}...${Math.random().toString(36).substring(2, 8)}`;
+        // Generate a deterministic mock Solana address
+        const addressSeed = Math.abs(pathHash) + accountPrefix.charCodeAt(0);
+        const mockAddress = `Sol${addressSeed.toString(36)}${accountPrefix.slice(-4)}...${Math.abs(addressSeed * 7).toString(36).substring(0, 6)}`;
         
         setSenderAddress(mockAddress);
 
-        // Try to get balance from the receiver address (real Solana call)
+        // Generate a deterministic simulated balance
         try {
-          const receiverPubkey = new PublicKey(receiverAddress);
-          const balance = await connection.getBalance(receiverPubkey);
-          const balanceInSol = balance / 1000000000; // Convert lamports to SOL
-          setSolanaBalance(balanceInSol.toString());
+          // Create a deterministic balance based on the address seed
+          const balanceSeed = Math.abs(addressSeed * 13) % 1000000; // 0-999999
+          const simulatedBalance = (balanceSeed / 100000) * 15; // 0-15 SOL
+          setSolanaBalance(simulatedBalance.toFixed(6));
           setStatus(
-            `Generated Solana address: ${mockAddress}, Receiver balance: ${balanceInSol} SOL`
+            `Generated Solana address: ${mockAddress}, Balance: ${simulatedBalance.toFixed(6)} SOL`
           );
         } catch (error) {
-          setStatus(`Generated Solana address: ${mockAddress} (Receiver address invalid)`);
+          setStatus(`Generated Solana address: ${mockAddress} (Demo mode - simulated balance)`);
         }
       } catch (error) {
         console.error("Error generating mock address:", error);
         setStatus(`Error: ${error.message}`);
       }
     }
-  }, [signer?.accountId, nearAccountId, debouncedDerivationPath, setStatus, receiverAddress]);
+  }, [signer?.accountId, nearAccountId, debouncedDerivationPath, setStatus]);
 
   // Helper: signAndSendTransactions using provided signer or local selector (Hot Wallet)
   const signAndSendTransactions = async (params) => {
@@ -196,8 +197,12 @@ export function SolanaView({ props: { setStatus }, signer }) {
           onChange={(e) => setDerivationPath(e.target.value)}
           disabled={isLoading}
         />
-        <div className="mt-3 p-3 bg-gray-800 border border-gray-600 rounded-lg">
-          <span className="text-green-400 text-sm font-mono">{senderAddress}</span>
+        <div className="mt-3 p-4 bg-gray-800 border border-gray-600 rounded-lg">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-gray-400 text-xs font-medium">Generated Address:</span>
+            <span className="text-green-400 text-xs font-medium">Balance: {solanaBalance} SOL</span>
+          </div>
+          <span className="text-green-400 text-sm font-mono break-all">{senderAddress}</span>
         </div>
       </div>
 

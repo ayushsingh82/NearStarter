@@ -118,12 +118,11 @@ const NearWalletProvider = ({ children }) => {
       request_type: "call_function",
       account_id: contractId,
       method_name: method,
-      args_base64: Buffer.from(JSON.stringify(args)).toString("base64"),
+      args_base64: btoa(JSON.stringify(args)),
       finality: "optimistic",
     });
 
-    //@ts-expect-error
-    return JSON.parse(Buffer.from(res.result).toString());
+    return JSON.parse(atob(res.result));
   };
 
   const callMethod = async ({
